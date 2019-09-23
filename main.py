@@ -7,17 +7,36 @@ DEPS: colorama, requests
 '''
 
 import requests
+import platform
 import getpass
+import argparse
 import random
 import os
 from colorama import Fore, Back, Style 
 from urllib.parse import quote
 
-# CHANGE THIS, REPLACE THE *WHOLE* STRING WITH THE PATH TO Retro.exe 
-LAUNCH_ARG =        "WINEARCH=win32 WINEPREFIX=~/.wine32 wine ~/.wine32/drive_c/users/*/Application\ Data/FusionFall\ Universe/Games/Retro/Retro.exe"
+parser = argparse.ArgumentParser()
+parser.add_argument('--client', help='Launch a custom URL on the client')
+args = parser.parse_args()
 
-#print("\nFFR-ReLauncher - Made by Reverse Engineering the FFR client & launcher!")
-#print(Fore.GREEN + "https://github.com/CPunch/FFR-ReLauncher" + Style.RESET_ALL)
+CLIENT_URL = "https://playclient.fusionfallretro.com"
+
+if args.client:
+    client = args.client
+    if "fusionfallretro.com" in client:
+        CLIENT_URL = client
+    else:
+        CLIENT_URL = client + "?q=fusionfallretro.com"
+
+# CHANGE THIS, REPLACE THE *WHOLE* STRING WITH THE PATH TO Retro.exe if this errors
+LAUNCH_ARG = os.path.join(os.path.join(os.environ['USERPROFILE'], "\\Application Data\\FusionFall Universe\\Games\\Retro\\Retro.exe")
+
+# fusionfall is installed on linux via wine :)
+if 'Linux' in platform.system():
+    LAUNCH_ARG =        "WINEARCH=win32 WINEPREFIX=~/.wine32 wine ~/.wine32/drive_c/users/*/Application\ Data/FusionFall\ Universe/Games/Retro/Retro.exe"
+
+print("\nFFR-ReLauncher - Made by Reverse Engineering the FFR client & launcher!")
+print(Fore.GREEN + "https://github.com/CPunch/FFR-ReLauncher" + Style.RESET_ALL)
 
 BASE_URL =          "https://www.fusionfalluniverse.com"
 UPDATE_CHECK_URL =  BASE_URL + "/api/launcher/check_update/"
@@ -78,7 +97,7 @@ if not result['errc'] == 0:
 
 print("Game token: " + result['token'])
 
-os.system(LAUNCH_ARG + " -username " + username + " -token " + result['token'] + " -url https://playclient.fusionfallretro.com")
+os.system(LAUNCH_ARG + " -username " + username + " -token " + result['token'] + " -url " + CLIENT_URL)
 
 # when game is closed, invalidate token
 print("Invalidating Token!")

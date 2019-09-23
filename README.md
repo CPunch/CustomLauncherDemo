@@ -12,10 +12,10 @@ Nope! As a side effect of this, if you were MAC banned you should be able to cre
 I didn't bother adding support for that because I had already been banned, and this is still more of a POC than an actual usable script. If you want to add it, make a merge request!
 
 # How do I make it launch a custom URL?
-with the -client (URL)
+with the --client (URL)
 e.g
 '''bash
-python3 main.py -client https://google.com/
+python3 main.py --client https://google.com/
 '''
 
 # I have an import error!!!
