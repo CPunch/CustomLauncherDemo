@@ -8,24 +8,29 @@ DEPS: colorama, requests
 
 import requests
 import getpass
+import random
 import os
 from colorama import Fore, Back, Style 
 from urllib.parse import quote
 
 # CHANGE THIS, REPLACE THE *WHOLE* STRING WITH THE PATH TO Retro.exe 
-LAUNCH_PATH =       "/home/cpunch/.wine32/drive_c/users/cpunch/Application Data/FusionFall Universe/"
-LAUNCH_ARG =        "WINEARCH=win32 WINEPREFIX=~/.wine32 wine Games/Retro/Retro.exe"
+LAUNCH_ARG =        "WINEARCH=win32 WINEPREFIX=~/.wine32 wine ~/.wine32/drive_c/users/*/Application\ Data/FusionFall\ Universe/Games/Retro/Retro.exe"
 
-print("\nFFR-ReLauncher - Made by Reverse Engineering the FFR client & launcher!")
-print(Fore.GREEN + "https://github.com/CPunch/CustomLauncherDemo" + Style.RESET_ALL)
+#print("\nFFR-ReLauncher - Made by Reverse Engineering the FFR client & launcher!")
+#print(Fore.GREEN + "https://github.com/CPunch/FFR-ReLauncher" + Style.RESET_ALL)
 
 BASE_URL =          "https://www.fusionfalluniverse.com"
 UPDATE_CHECK_URL =  BASE_URL + "/api/launcher/check_update/"
 LOGIN_URL =         BASE_URL + "/api/launcher/login/"
 TOKEN_URL =         BASE_URL + "/api/launcher/game_token/"
+INVALID_TOKEN_URL = BASE_URL + "/api/launcher/invalidate_game_token/"
 
 SPOOFED_CLIENT_VERSION = "1.0.5"
-FAKE_MAC = "90:e7:fb:d7:28:2d" # for some reason the FFU launcher likes to send your mac address to the server
+
+# this will generate a random mac address registered to Xensource Inc.  
+FAKE_MAC = "02:00:00:%02x:%02x:%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+print(Fore.BLUE + "Generated MAC: " + FAKE_MAC + Style.RESET_ALL)
 
 # keeps cookies & headers across api requests
 launcherSession = requests.Session()
@@ -52,10 +57,11 @@ session = ''
 # login :eyes:
 res = launcherSession.post(LOGIN_URL, data='device=ffudevid-' + FAKE_MAC + '&remember_me=false&session&username='+quote(username)+'&password='+quote(password))
 result = res.json()
+print(res.text)
 if result['errc'] == 0:
     print(Fore.GREEN + "Logged in successfully!" + Style.RESET_ALL)
     session = result['session']
-    print('Session Token:' + session)
+    print('Session Token: ' + session)
 else:
     print(Fore.RED + "Invalid username & password combo!" + Style.RESET_ALL)
     exit(0)
@@ -72,5 +78,8 @@ if not result['errc'] == 0:
 
 print("Game token: " + result['token'])
 
-os.chdir(LAUNCH_PATH)
 os.system(LAUNCH_ARG + " -username " + username + " -token " + result['token'] + " -url https://playclient.fusionfallretro.com")
+
+# when game is closed, invalidate token
+print("Invalidating Token!")
+launcherSession.post(INVALID_TOKEN_URL, data='token='+result['token']+"&username="+quote(username))
