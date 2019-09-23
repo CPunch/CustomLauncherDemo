@@ -1,13 +1,13 @@
 '''
 FFR-CustomLauncher: Main.py
 Author: CPunch
-Desc: Made by reverse engineering web api in the launcher & client. Ability to run a custom client or even go to google.com lol :)
+Desc: Made by reverse engineering Web API in FFU Launcher. Can launch custom clients, bypass MAC bans, etc.
 
 DEPS: colorama, requests
 '''
 
 import requests
-import platform
+import platform as platform
 import getpass
 import argparse
 import random
@@ -29,11 +29,13 @@ if args.client:
         CLIENT_URL = client + "?q=fusionfallretro.com"
 
 # CHANGE THIS, REPLACE THE *WHOLE* STRING WITH THE PATH TO Retro.exe if this errors
-LAUNCH_ARG = os.path.join(os.path.join(os.environ['USERPROFILE'], "\\Application Data\\FusionFall Universe\\Games\\Retro\\Retro.exe")
+LAUNCH_ARG = ""
 
 # fusionfall is installed on linux via wine :)
-if 'Linux' in platform.system():
+if "Linux" in platform.system():
     LAUNCH_ARG =        "WINEARCH=win32 WINEPREFIX=~/.wine32 wine ~/.wine32/drive_c/users/*/Application\ Data/FusionFall\ Universe/Games/Retro/Retro.exe"
+elif "Windows" in platform.system():
+    LAUNCH_ARG = os.path.join(os.path.join(os.environ['USERPROFILE'], "\\Application Data\\FusionFall Universe\\Games\\Retro\\Retro.exe"))
 
 print("\nFFR-ReLauncher - Made by Reverse Engineering the FFR client & launcher!")
 print(Fore.GREEN + "https://github.com/CPunch/FFR-ReLauncher" + Style.RESET_ALL)
@@ -57,7 +59,7 @@ launcherSession = requests.Session()
 # mimic launcher headers
 launcherSession.headers = {
     'User-Agent': 'ffu-launcher', 
-    'Launcher-Version': 'ffu-1.0.5',
+    'Launcher-Version': 'ffu-'+SPOOFED_CLIENT_VERSION,
     'Content-Type': 'application/x-www-form-urlencoded',
     'Connection': 'Keep-Alive',
     'Accept-Encoding': 'gzip, deflate',
@@ -76,7 +78,7 @@ session = ''
 # login :eyes:
 res = launcherSession.post(LOGIN_URL, data='device=ffudevid-' + FAKE_MAC + '&remember_me=false&session&username='+quote(username)+'&password='+quote(password))
 result = res.json()
-print(res.text)
+
 if result['errc'] == 0:
     print(Fore.GREEN + "Logged in successfully!" + Style.RESET_ALL)
     session = result['session']
@@ -85,7 +87,7 @@ else:
     print(Fore.RED + "Invalid username & password combo!" + Style.RESET_ALL)
     exit(0)
 
-# grab game launch info: TODO
+# grab game launch info: TODO maybe update??
 
 
 # grab game token
